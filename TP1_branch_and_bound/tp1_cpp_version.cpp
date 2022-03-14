@@ -116,16 +116,26 @@ void go(int32_t i, const vector<pair<int32_t, int32_t>>& items, float profit, in
 
 int main(void)
 {
-  vector<pair<int32_t, int32_t>> items = {{10,2},{10,4},{12,6},{18,9}};
-  auto comp = [&](const pair<int32_t, int32_t>& p1, const pair<int32_t, int32_t>& p2)
+  ifstream cin("testcases.txt");
+  vector<pair<int32_t, int32_t>> items;
+  int32_t N;
+  cin >> N;
+  while(N--)
   {
-    return (p1.first/p1.second) > (p2.first/p2.second);
-  };
-  sort(items.begin(), items.end());
-  int32_t W = 15;
-  cout << "this is recursive solution, it sucks ! (t3ayi)" << endl;
-  go(0, items, 0, W, INT_MAX);
-  cout << "--------------------------------------------------------" << endl;
-  branch_and_bound(items, W);
+    int32_t n; cin >> n;
+    int32_t W; cin >> W;
+    vector<int32_t> a; for(int32_t i = 0; i < n; i++) { int32_t p; cin >> p; a.push_back(p);}
+    vector<int32_t> b; for(int32_t i = 0; i < n; i++) { int32_t w; cin >> w; b.push_back(w);}
+    for(int32_t i = 0; i < n; i++) items.push_back(make_pair(a[i], b[i]));
+    auto comp = [&](const pair<int32_t, int32_t>& p1, const pair<int32_t, int32_t>& p2)
+    {
+      return (p1.first/p1.second) > (p2.first/p2.second);
+    };
+    sort(items.begin(), items.end());
+    cout << "this is recursive solution, it sucks ! (t3ayi)" << endl;
+    go(0, items, 0, W, INT_MAX);
+    cout << "--------------------------------------------------------" << endl;
+    branch_and_bound(items, W);
+  }
   return 0;
 }
