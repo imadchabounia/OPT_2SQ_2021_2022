@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-//Who was asking for oranges !!!
+const float oo = (1e+9);
 
 struct Node
 {
@@ -32,6 +32,7 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
   st.push(make_shared<Node>(0, 0, 0, W, INT_MAX, nullptr));
   vector<shared_ptr<Node>> candidates;
   int32_t n = items.size();
+  float M = -oo; //borne inf
   while(!st.empty())
   {
     shared_ptr<Node> top = st.top();
@@ -39,6 +40,7 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
     if(top->i == n)
     {
       candidates.push_back(top);
+      M = fmaxf(M, top->profit);
     }
     else if(top->i < n)
     {
@@ -52,7 +54,7 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
         new_w = top->w-items[top->i].second*xi;
         float new_eval = top->eval;
         shared_ptr<Node> new_parent = top;
-        if(new_profit <= new_eval)
+        if(new_profit <= new_eval && new_profit >= M)
         {
           st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
         }
@@ -68,7 +70,6 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
           float new_eval = fminf(top->eval, (items[new_i].first/items[new_i].second)*new_w);
           st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
         }
-
       }
     }
   }
