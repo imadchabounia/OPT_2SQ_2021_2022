@@ -54,7 +54,7 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
         new_w = top->w-items[top->i].second*xi;
         float new_eval = top->eval;
         shared_ptr<Node> new_parent = top;
-        if(new_profit <= new_eval && new_profit >= M)
+        if(new_profit <= new_eval)
         {
           st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
         }
@@ -68,7 +68,7 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
           int32_t new_x = xi;
           float new_profit = top->profit + items[top->i].first*xi;
           float new_eval = fminf(top->eval, (items[new_i].first/items[new_i].second)*new_w);
-          st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
+          if(new_eval >= M) st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
         }
       }
     }
@@ -91,7 +91,7 @@ void go(int32_t i, const vector<pair<int32_t, int32_t>>& items, float profit, in
   if(W == 0 || i == (int32_t)items.size())
   {
 
-    cout << "Profit = " << profit << endl;
+    //cout << "Profit = " << profit << endl;
     return;
   }
   if(profit > eval) return;
@@ -117,11 +117,11 @@ void go(int32_t i, const vector<pair<int32_t, int32_t>>& items, float profit, in
 int main(void)
 {
   ifstream cin("testcases.txt");
-  vector<pair<int32_t, int32_t>> items;
   int32_t N;
   cin >> N;
   while(N--)
   {
+    vector<pair<int32_t, int32_t>> items;
     int32_t n; cin >> n;
     int32_t W; cin >> W;
     vector<int32_t> a; for(int32_t i = 0; i < n; i++) { int32_t p; cin >> p; a.push_back(p);}
@@ -136,6 +136,7 @@ int main(void)
     go(0, items, 0, W, INT_MAX);
     cout << "--------------------------------------------------------" << endl;
     branch_and_bound(items, W);
+    cout << "--------------------------------------------------------" << endl;
   }
   return 0;
 }
