@@ -27,6 +27,7 @@ void afficher_solution(shared_ptr<Node> solution)
 
 void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
 {
+  //solution récursive
   //W : capacité max
   stack<shared_ptr<Node>> st;
   st.push(make_shared<Node>(0, 0, 0, W, INT_MAX, nullptr));
@@ -133,7 +134,7 @@ int main(void)
     };
     sort(items.begin(), items.end());
     //cout << "this is recursive solution, it sucks ! (t3ayi)" << endl;
-    go(0, items, 0, W, INT_MAX);
+    //go(0, items, 0, W, INT_MAX);
     cout << "--------------------------------------------------------" << endl;
     branch_and_bound(items, W);
     cout << "--------------------------------------------------------" << endl;
