@@ -54,7 +54,7 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
         new_w = top->w-items[top->i].second*xi;
         float new_eval = top->eval;
         shared_ptr<Node> new_parent = top;
-        if(new_profit <= new_eval)
+        if(new_profit < new_eval)
         {
           st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
         }
@@ -68,7 +68,7 @@ void branch_and_bound(const vector<pair<int32_t, int32_t>>& items, int32_t W)
           int32_t new_x = xi;
           float new_profit = top->profit + items[top->i].first*xi;
           float new_eval = fminf(top->eval, (items[new_i].first/items[new_i].second)*new_w);
-          if(new_eval >= M) st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
+          if(new_eval > M) st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent));
         }
       }
     }
@@ -132,7 +132,7 @@ int main(void)
       return (p1.first/p1.second) > (p2.first/p2.second);
     };
     sort(items.begin(), items.end());
-    cout << "this is recursive solution, it sucks ! (t3ayi)" << endl;
+    //cout << "this is recursive solution, it sucks ! (t3ayi)" << endl;
     go(0, items, 0, W, INT_MAX);
     cout << "--------------------------------------------------------" << endl;
     branch_and_bound(items, W);
