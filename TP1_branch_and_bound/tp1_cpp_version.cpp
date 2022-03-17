@@ -46,7 +46,7 @@ void branch_and_bound(const vector<vector<int32_t>>& items, int32_t W)
       if(top->profit > M)
       {
         solution = top;
-        M = fmaxf(M, top->profit);
+        M = top->profit;
       }
     }
     else if(top->i < n)
@@ -67,8 +67,8 @@ void branch_and_bound(const vector<vector<int32_t>>& items, int32_t W)
           if(new_i < n)
           {
             shared_ptr<Node> new_parent = top;
-            int32_t new_x = xi;
-            new_eval = fminf(top->eval, new_profit + (items[new_i][0]/items[new_i][1])*new_w);
+            float eval_possible = (float )((float )new_profit + ((float )items[new_i][0]/(float )items[new_i][1])*(float )new_w);
+            new_eval = (float )fminf(top->eval, eval_possible);
             if(new_eval >= M) st.push(make_shared<Node>(new_i, new_x, new_profit, new_w, new_eval, new_parent, new_index));
           }
           else
@@ -79,50 +79,9 @@ void branch_and_bound(const vector<vector<int32_t>>& items, int32_t W)
       }
     }
   }
-  /*
-  shared_ptr<Node> solution = candidates.back();
-  cout << "number of possible solutions : " << candidates.size() << endl;
-  for(auto& p : candidates)
-  {
-    if(p->profit > solution->profit)
-    {
-      solution = p;
-    }
-  }
-  */
+
   afficher_solution(solution);
 }
-
-/*
-void go(int32_t i, const vector<pair<int32_t, int32_t>>& items, float profit, int32_t W, float eval)
-{
-  int32_t n = items.size();
-  if(W == 0 || i == (int32_t)items.size())
-  {
-
-    //cout << "Profit = " << profit << endl;
-    return;
-  }
-  if(profit > eval) return;
-  else
-  {
-    int32_t w = 0;
-    for(int32_t xi = 0; W-items[i][1]*xi >= 0; xi++)
-    {
-      w = W-items[i][1]*xi;
-      go(i+1, items, profit+items[i][0]*xi, w, eval);
-    }
-    if (w>0)
-    {
-      if(i+1 < n)
-      {
-        float new_eval = fminf(eval, profit + (items[i+1].first/items[i+1].second)*w);
-        go(i+1, items, profit, w, new_eval);
-      }
-    }
-  }
-}
-*/
 
 int main(void)
 {
@@ -142,8 +101,6 @@ int main(void)
       return (float )((float )p1[0]/(float )p1[1]) > (float )((float )p2[0]/(float )p2[1]);
     };
     sort(items.begin(), items.end(), comp);
-    //cout << "this is recursive solution, it sucks ! (t3ayi)" << endl;
-    //go(0, items, 0, W, INT_MAX);
     cout << "--------------------------------------------------------" << endl;
     branch_and_bound(items, W);
     cout << "--------------------------------------------------------" << endl;
