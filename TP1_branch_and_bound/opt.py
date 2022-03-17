@@ -1,46 +1,20 @@
-"""
-
-INPUT:
-    [[b1, v1], [b2, v2], [b3, v3] ,,, ]
-
-OUTPUT:
-    [f1, f2, f3 ,,,]
-
-"""
-"""
-input = [[2, 10], [3, 10], [4, 20], [5, 20]]
-
-N = len(input)
-
-U = [[i, input[i][1]/input[i][0]] for i in range(N)]
-
-
-def tri_U(element):
-    return element[1]
-
-
-U.sort(key=tri_U)
-
-print(U)
-"""
-
 infinity = 10000000000000
 
-Input = [[1, 1], [30, 50]]
-W = 100
-
+Input = [[10, 1, 0], [40, 3, 1], [50, 4, 2], [70, 5, 3]]
+W = 8
 
 class Node:
-    def __init__(self, i, x, profit, w, evaluation, node):
+    def __init__(self, i, x, profit, w, evaluation, node, index):
         self.i = i
         self.x = x
         self.profit = profit
         self.space = w
         self.evaluation = evaluation
         self.parent = node
+        self.index = index
 
     def __str__(self):
-        return "x" + str(self.i) + " = " + str(self.x)
+        return "x" + str(self.index) + " = " + str(self.x)
 
 
 def afficher(node):
@@ -51,7 +25,7 @@ def afficher(node):
 
 
 def branch_and_bound(capacity, items):
-    stack = [Node(0, 0, 0, capacity, infinity, None)]
+    stack = [Node(0, 0, 0, capacity, infinity, None, 0)]
 
     candidates = []
 
@@ -59,43 +33,35 @@ def branch_and_bound(capacity, items):
 
     borne_inf = -infinity
 
+    solution = stack[-1]
+
     while stack:
         top = stack.pop()
         if top.i == number_of_items:
-            candidates.append(top)
-            borne_inf = max(borne_inf, top.profit)
+            if(top.profit > borne_inf):
+                solution = top
+                borne_inf = top.profit
 
         elif top.i < number_of_items:
             new_space = top.space
             new_i = top.i + 1
+            new_index = items[top.i][2]+1
             xi = 0
             while top.space >= items[top.i][1]*xi:
 
                 new_x = xi
                 new_profit = top.profit + items[top.i][0]*xi
-
                 new_space = top.space - items[top.i][1]*xi
-
                 new_evaluation = top.evaluation
                 new_parent = top
-                if new_profit < new_evaluation:
-                    stack.append(Node(new_i, new_x, new_profit, new_space, new_evaluation, new_parent))
+                if new_i < number_of_items:
+                    new_evaluation = min(top.evaluation, new_profit + (items[new_i][0] / items[new_i][1])*new_space)
+                    if new_evaluation >= borne_inf:
+                        stack.append(Node(new_i, new_x, new_profit, new_space, new_evaluation, new_parent, new_index))
+                else:
+                    stack.append(Node(new_i, new_x, new_profit, new_space, new_evaluation, new_parent, new_index))
 
                 xi += 1
-            if new_space > 0:
-                if new_i < number_of_items:
-                    new_parent = top
-                    new_x = xi
-                    new_profit = top.profit + items[top.i][0] * xi
-                    new_evaluation = min(top.evaluation, (items[new_i][0] / items[new_i][1])*new_space)
-                    if new_evaluation > borne_inf:
-                        stack.append(Node(new_i, new_x, new_profit, new_space, new_evaluation, new_parent))
-
-    solution = candidates.pop()
-
-    for candidate in candidates:
-        if candidate.profit > solution.profit:
-            solution = candidate
     afficher(solution)
 
 
