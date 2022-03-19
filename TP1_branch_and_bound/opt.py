@@ -1,8 +1,5 @@
 infinity = 10000000000000
 
-Input = [[10, 1, 0], [40, 3, 1], [50, 4, 2], [70, 5, 3]]
-W = 8
-
 class Node:
     def __init__(self, i, x, profit, w, evaluation, node, index):
         self.i = i
@@ -22,7 +19,7 @@ def afficher(node):
     while node.i != 0 and node.parent is not None:
         print(node)
         node = node.parent
-
+    print("-------------------------------------------------------------------------")
 
 def branch_and_bound(capacity, items):
     stack = [Node(0, 0, 0, capacity, infinity, None, 0)]
@@ -70,8 +67,25 @@ def tri_a(element):
 
 
 def worker():
-    Input.sort(reverse=True, key=tri_a)
-    branch_and_bound(W, Input)
 
+    file = open("testcases.txt", 'r')
+    indice_objet = 0
+    benefices = []
+    for line in file:
+        values = line.split();
+        if len(values) == 0:
+            continue
+        else:
+            if values[0] == "$1":
+                W = int(values[-1])
+            elif values[0] == "$2":
+                benefices = values[1:]
+            elif values[0] == "$3":
+                items = []
+                values = values[1:]
+                for i in range(0, len(benefices)):
+                    items.append([int(benefices[i]), int(values[i]), i])
+                items.sort(reverse=True, key=tri_a)
+                branch_and_bound(W, items)
 
 worker()
