@@ -1,5 +1,7 @@
 infinity = 10000000000000
 
+import time
+
 class Node:
     def __init__(self, i, x, profit, w, evaluation, node, index):
         self.i = i
@@ -23,8 +25,6 @@ def afficher(node):
 
 def branch_and_bound(capacity, items):
     stack = [Node(0, 0, 0, capacity, infinity, None, 0)]
-
-    candidates = []
 
     number_of_items = len(items)
 
@@ -69,10 +69,9 @@ def tri_a(element):
 def worker():
 
     file = open("testcases.txt", 'r')
-    indice_objet = 0
     benefices = []
     for line in file:
-        values = line.split();
+        values = line.split()
         if len(values) == 0:
             continue
         else:
@@ -86,6 +85,8 @@ def worker():
                 for i in range(0, len(benefices)):
                     items.append([int(benefices[i]), int(values[i]), i])
                 items.sort(reverse=True, key=tri_a)
+                time_start = time.time()
                 branch_and_bound(W, items)
-
+                time_end = time.time()
+                print(time_end - time_start)
 worker()
