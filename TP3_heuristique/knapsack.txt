@@ -1,0 +1,14 @@
+[*] An heuristic for unbounded knapsack
+
+Phase1 : Init solution
+
+We use worth and we take as much as possible from each element, so we will pick m elements
+
+Phase2 : We try to improve
+
+Here we try to work on coefficients xi of each picked item and also left ones
+
+for each element already picked, we try to decrease value of x and search for another element which can be a better fit while taking into consideration all elements but we don't change the rest, items with index > m
+
+
+
