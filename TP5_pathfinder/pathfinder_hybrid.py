@@ -5,13 +5,19 @@ import time
 
 items = []
 capacity = 0
+umax = None
+rmax = None
 
 class PFAParameters:
-    def __init__(self, max_number_populations : int, max_iter_init : int, max_iter : int, bound : int):
+    def __init__(self, max_number_populations : int, max_iter_init : int, max_iter : int, bound : int, Umax : int, r_max : int):
+        global umax
+        global rmax
         self.max_number_populations = max_number_populations
         self.max_iter_init = max_iter_init
         self.max_iter = max_iter
         self.bound = bound
+        umax = Umax
+        rmax = r_max
 
 def fitness(S):
 
@@ -63,7 +69,7 @@ def find_pathfinder(population):
     return pathfinder,pathfinder_pos
 
 def update_pathfinder(pathfinder_k, pathfinder_k_1, A):
-    r3 = [random.random() for i in range(0, len(items))]
+    r3 = [random.randint(0, rmax) for i in range(0, len(items))]
     pathfinder_new = np.add(pathfinder_k, np.multiply(np.multiply(2,r3), np.subtract(pathfinder_k,pathfinder_k_1)))
     pathfinder_new = np.add(pathfinder_new, A)
     return pathfinder_new
@@ -72,21 +78,23 @@ def generate_epsilon(K, Kmax, population):
 
     global items
 
-    u1 = [random.uniform(-1, 1) for i in range(0, len(items))]
+    u1 = [random.randint(-umax, umax) for i in range(0, len(items))]
     ct = (1-K/Kmax)
     epsilon = np.multiply(ct, u1)
     i = random.randint(0, len(population)-1)
     j = random.randint(0, len(population)-1)
     Dij = np.abs(np.subtract(population[i], population[j]))
     epsilon = np.multiply(epsilon, Dij)
-    return epsilon
-
+    return epsilon.astype(int)
 
 def update_member(population, i, pathfinder_k, epsilon, alpha, beta):
+
+    global rmax
+
     new_member = population[i]
-    r1 = [random.random() for i in range(0, len(items))]
+    r1 = [random.randint(0, rmax) for i in range(0, len(items))]
     R1 = np.multiply(alpha, r1)
-    r2 = [random.random() for i in range(0, len(items))]
+    r2 = [random.randint(0, rmax) for i in range(0, len(items))]
     R2 = np.multiply(beta, r2)
     j = random.randint(0, len(population)-1)
 
@@ -101,16 +109,17 @@ def update_member(population, i, pathfinder_k, epsilon, alpha, beta):
 def generateA(Kmax, K):
 
     global items
+    global umax
 
-    u2 = [random.uniform(-1,1) for i in range(0, len(items))]
-    return np.multiply(np.exp(-2*K/Kmax),u2)
+    u2 = [random.randint(-umax,umax) for i in range(0, len(items))]
+    return np.multiply(int(np.exp(-2*K/Kmax)),u2)
 
 def PFA():
 
     global items
     global capacity
 
-    pfa_parameters = PFAParameters(200, 1000, 1000, 4)
+    pfa_parameters = PFAParameters(200, 10000, 10000, 6, 1, 1)
     population = init_population(pfa_parameters)
     pathfinder_k, pathfinder_pos = find_pathfinder(population)
     pathfinder_k_1 = pathfinder_k
@@ -121,8 +130,8 @@ def PFA():
 
     while K < pfa_parameters.max_iter:
         print(K)
-        alpha = random.uniform(1,2)
-        beta = random.uniform(1,2)
+        alpha = random.randint(1,2)
+        beta = random.randint(1,2)
 
         #update path finder position
         new_pathfinder = update_pathfinder(pathfinder_k, pathfinder_k_1,A)
@@ -161,8 +170,65 @@ def PFA():
 
     return pathfinder_k
 
+def genererVoisins(S, borne_sup_perturbation):
 
-def worker():
+    voisins = list()
+    for i in range(0, len(S)):
+        tmp_S = S.copy()
+        for k in range(1, borne_sup_perturbation):
+            tmp_S[i] += 1
+            tmp_to_append = tmp_S.copy()
+            voisins.append(tmp_to_append)
+        tmp_S = S.copy()
+        for k in range(1, borne_sup_perturbation):
+            if tmp_S[i] >= 1:
+                tmp_S[i] -= 1
+                tmp_to_append = tmp_S.copy()
+                voisins.append(tmp_to_append)
+
+    return voisins
+
+def recuit_simule(borne_inf_temperature, R, T, S0, borne_sup_perturbation):
+
+    S_etoile = S0.copy()
+    S = S0.copy()
+    #R = 100
+    #borne_inf_temperature = 1
+    #T = 10230
+    alpha = .9
+    stop = False
+
+    while not stop:
+
+        S_etoile_ancienne = S_etoile.copy()
+        voisins = genererVoisins(S,borne_sup_perturbation)
+        #selectionner le meilleurs des voisins
+        iter = R
+
+        while iter > 0:
+
+            i = random.randint(0, len(voisins)-1)
+            S_prime = voisins[i]
+            if(fitness(S_prime) >=  fitness(S)):
+                S = S_prime
+            else:
+                r = random.random()
+                Delta_F = fitness(S)-fitness(S_prime)
+                if r < math.exp(-(Delta_F/T)):
+                    S = S_prime
+
+            if fitness(S) > fitness(S_etoile):
+                S_etoile = S
+
+            iter -= 1
+
+        T = alpha*T
+        if T <= borne_inf_temperature:
+            stop = True
+
+    return S_etoile
+
+def main():
     global items
     global capacity
     file = open("testcases.txt", 'r')
@@ -187,4 +253,14 @@ def worker():
                 print("Solution S* = " + str(S_etoile))
                 print(fitness(S_etoile))
                 print(time_end - time_start)
-worker()
+                #recuit simulé
+
+                time_start = time.perf_counter()
+                S_etoile = recuit_simule(1,10000,102300,S_etoile,15)
+                time_end = time.perf_counter()
+                print("Solution S* = " + str(S_etoile))
+                print(fitness(S_etoile))
+                print(time_end - time_start)
+
+if __name__ == '__main__':
+    main()

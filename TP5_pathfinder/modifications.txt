@@ -1,0 +1,16 @@
+R1 = alpha * r1 (r1 in [0,5])
+
+R2 = beta * r2 (r2 in [0,5])
+
+r3 in [0,5]
+
+beta, alpha in {1, 2} randomly
+
+epsilon : take int
+
+u1, u2 in [-5, 5]
+
+A : init u2, every iteration, multiply by e^(-2/kmax) and take int
+
+
+
