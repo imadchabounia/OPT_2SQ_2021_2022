@@ -9,18 +9,19 @@ umax = None
 rmax = None
 
 class PFAParameters:
-    def __init__(self, max_number_populations : int, max_iter_init : int, max_iter : int, bound : int, Umax : int, r_max : int):
+    #parametres de l'agorithme PFA
+    def __init__(self, taille_initial_population : int, max_iter_init : int, max_iter : int, bound : int, Umax : int, r_max : int):
         global umax
         global rmax
-        self.max_number_populations = max_number_populations
-        self.max_iter_init = max_iter_init
-        self.max_iter = max_iter
-        self.bound = bound
-        umax = Umax
-        rmax = r_max
+        self.taille_initial_population = taille_initial_population #taille initial de la population
+        self.max_iter_init = max_iter_init #nombre d'iterations maximum pour la génération de la population initial
+        self.max_iter = max_iter #nombre d'itération de l'algorithm PFA
+        self.bound = bound #c'est borne qui sert à la génération des solutions (individus) aléatoires
+        umax = Umax #parametre pour adapter PFA au problème du sac à dos
+        rmax = r_max #parametre pour adapter PFA au problème du sac à dos
 
 def fitness(S):
-
+    #fonction fitness (fonction d'évaluation de la solution)
     global items
     global capacity
     S = np.array(S)
@@ -43,7 +44,7 @@ def init_population(pfa_parameters : PFAParameters):
     max_iter_init = pfa_parameters.max_iter_init
     population = list()
 
-    while (len(population) < pfa_parameters.max_number_populations) and (max_iter_init>0) :
+    while (len(population) < pfa_parameters.taille_initial_population) and (max_iter_init>0) :
 
         member = [random.randint(0, pfa_parameters.bound) for i in range(0, len(items))]
         if fitness(member) > 0:
@@ -119,7 +120,7 @@ def PFA():
     global items
     global capacity
 
-    pfa_parameters = PFAParameters(200, 10000, 10000, 6, 1, 1)
+    pfa_parameters = PFAParameters(200, 30000, 30000, 6, 1, 1)
     population = init_population(pfa_parameters)
     pathfinder_k, pathfinder_pos = find_pathfinder(population)
     pathfinder_k_1 = pathfinder_k
@@ -129,7 +130,7 @@ def PFA():
     epsilon = generate_epsilon(K,pfa_parameters.max_iter,population)
 
     while K < pfa_parameters.max_iter:
-        print(K)
+        print(f"{K} --> {fitness(pathfinder_k)}")
         alpha = random.randint(1,2)
         beta = random.randint(1,2)
 
@@ -168,12 +169,14 @@ def PFA():
         A = generateA(K, pfa_parameters.max_iter)
         epsilon = generate_epsilon(K,pfa_parameters.max_iter,population)
 
-    return pathfinder_k
+    return pathfinder_k, population
 
 def genererVoisins(S, borne_sup_perturbation):
 
     voisins = list()
+    """
     for i in range(0, len(S)):
+
         tmp_S = S.copy()
         for k in range(1, borne_sup_perturbation):
             tmp_S[i] += 1
@@ -185,7 +188,26 @@ def genererVoisins(S, borne_sup_perturbation):
                 tmp_S[i] -= 1
                 tmp_to_append = tmp_S.copy()
                 voisins.append(tmp_to_append)
+    """
 
+    for i in range(0, len(S)):
+        for k in range(1, borne_sup_perturbation):
+            tmp_S = S.copy()
+            tmp_S[i] = tmp_S[i]+k
+            voisins.append(tmp_S)
+        for k in range(1, borne_sup_perturbation):
+            tmp_S = S.copy()
+            if tmp_S[i] >= k:
+                tmp_S[i] -= k
+                voisins.append(tmp_S)
+
+    """
+    for k in range(0, 100000):
+        random_solution = [random.randint(0, borne_sup_perturbation) for i in range(0, len(S))]
+        if(fitness(random_solution) <= 0):
+            continue
+        voisins.append(random_solution)
+    """
     return voisins
 
 def recuit_simule(borne_inf_temperature, R, T, S0, borne_sup_perturbation):
@@ -208,7 +230,7 @@ def recuit_simule(borne_inf_temperature, R, T, S0, borne_sup_perturbation):
         while iter > 0:
 
             i = random.randint(0, len(voisins)-1)
-            S_prime = voisins[i]
+            S_prime = voisins[i].copy()
             if(fitness(S_prime) >=  fitness(S)):
                 S = S_prime
             else:
@@ -247,16 +269,16 @@ def main():
                 for i in range(0, len(benefices)):
                     items.append([int(benefices[i]), int(values[i]), i])
 
+                #Pathfinder only
                 time_start = time.perf_counter()
                 S_etoile = PFA()
                 time_end = time.perf_counter()
                 print("Solution S* = " + str(S_etoile))
                 print(fitness(S_etoile))
                 print(time_end - time_start)
-                #recuit simulé
-
+                #hybridation with recuit_simule
                 time_start = time.perf_counter()
-                S_etoile = recuit_simule(1,10000,102300,S_etoile,15)
+                S_etoile = recuit_simule(1,1000,1023000,S_etoile,6)
                 time_end = time.perf_counter()
                 print("Solution S* = " + str(S_etoile))
                 print(fitness(S_etoile))

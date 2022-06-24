@@ -110,7 +110,7 @@ def PFA():
     global items
     global capacity
 
-    pfa_parameters = PFAParameters(200, 1000, 1000, 4)
+    pfa_parameters = PFAParameters(200, 30000, 30000, 6)
     population = init_population(pfa_parameters)
     pathfinder_k, pathfinder_pos = find_pathfinder(population)
     pathfinder_k_1 = pathfinder_k
@@ -120,7 +120,7 @@ def PFA():
     epsilon = generate_epsilon(K,pfa_parameters.max_iter,population)
 
     while K < pfa_parameters.max_iter:
-        print(K)
+        print(f"{K} --> {fitness(pathfinder_k)}")
         alpha = random.uniform(1,2)
         beta = random.uniform(1,2)
 
