@@ -2,6 +2,26 @@ infinity = 10000000000000
 
 import time
 
+class SolutionCLass:
+
+    def __init__(self):
+        self.solution_vector = list()
+        self.solution_fitness = list()
+        self.solution_time = list()
+        self.executions = list()
+
+    def addSolutionVector(self, s_v):
+        self.solution_vector.append(s_v)
+
+    def addSolutionFitness(self, s_f):
+        self.solution_fitness.append(s_f)
+
+    def addSolutionTime(self, s_t):
+        self.solution_time.append(s_t)
+
+    def addExecution(self, exec):
+        self.executions.append(exec)
+
 class Node:
     def __init__(self, i, x, profit, w, evaluation, node, index):
         self.i = i
@@ -16,12 +36,14 @@ class Node:
         return "x" + str(self.index) + " = " + str(self.x)
 
 
-def afficher(node):
-    print("profit = " + str(node.profit))
+def constructSolution(node):
+    solution_vector = list()
+    eval = node.profit
     while node.i != 0 and node.parent is not None:
-        print(node)
+        solution_vector.append(node.x)
         node = node.parent
-    print("-------------------------------------------------------------------------")
+
+    return solution_vector, eval
 
 def branch_and_bound(capacity, items):
     stack = [Node(0, 0, 0, capacity, infinity, None, 0)]
@@ -59,7 +81,7 @@ def branch_and_bound(capacity, items):
                     stack.append(Node(new_i, new_x, new_profit, new_space, new_evaluation, new_parent, new_index))
 
                 xi += 1
-    afficher(solution)
+    return constructSolution(solution)
 
 
 def tri_a(element):
@@ -67,7 +89,7 @@ def tri_a(element):
 
 
 def worker():
-
+    solutions = SolutionCLass()
     file = open("testcases.txt", 'r')
     benefices = []
     for line in file:
@@ -85,8 +107,11 @@ def worker():
                 for i in range(0, len(benefices)):
                     items.append([int(benefices[i]), int(values[i]), i])
                 items.sort(reverse=True, key=tri_a)
-                time_start = time.time()
-                branch_and_bound(W, items)
-                time_end = time.time()
-                print(time_end - time_start)
-worker()
+                time_start = time.perf_counter()
+                S_etoile, fitness = branch_and_bound(W, items)
+                time_end = time.perf_counter()
+                time_spent = time_end-time_start
+                solutions.solution_vector.append(S_etoile)
+                solutions.solution_time.append(time_spent)
+                solutions.solution_fitness.append(fitness)
+    return solutions
