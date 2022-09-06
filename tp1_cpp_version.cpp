@@ -1,7 +1,6 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-//Who was asking for oranges !!!
 
 struct Node
 {
@@ -122,7 +121,6 @@ int main(void)
   };
   sort(items.begin(), items.end());
   int32_t W = 15;
-  cout << "this is recursive solution, it sucks ! (t3ayi)" << endl;
   go(0, items, 0, W, INT_MAX);
   cout << "--------------------------------------------------------" << endl;
   branch_and_bound(items, W);
